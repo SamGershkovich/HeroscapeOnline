@@ -5,7 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public class Level
 {
-    public List<GameObject> peices = new List<GameObject>();
+    public List<GameObject> pieces = new List<GameObject>();
 }
 
 public class BoardManager : MonoBehaviour
@@ -17,25 +17,25 @@ public class BoardManager : MonoBehaviour
         AddLevel();
     }
 
-    public void AddPeice(int level, GameObject peice)
+    public void AddPiece(int level, GameObject piece)
     {
         if (level == levels.Count)
         {
             AddLevel();
         }
 
-        foreach (Transform child in peice.transform)
+        foreach (Transform child in piece.transform)
         {
-            levels[level].peices.Add(child.gameObject);
+            levels[level].pieces.Add(child.gameObject);
         }
     }
 
-    public void RemovePeice(int level, GameObject peice)
+    public void RemovePiece(int level, GameObject piece)
     {
         
-        foreach (Transform child in peice.transform)
+        foreach (Transform child in piece.transform)
         {
-            levels[level].peices.Remove(child.gameObject);
+            levels[level].pieces.Remove(child.gameObject);
         }
     }
 
@@ -44,17 +44,17 @@ public class BoardManager : MonoBehaviour
         levels.Add(new Level());
     }
 
-    public bool WithinGameBoard(GameObject peice)
+    public bool WithinGameBoard(GameObject piece)
     {
-        foreach (Transform child in peice.transform)//every tile in peice
+        foreach (Transform child in piece.transform)//every tile in piece
         {
             bool currTileWithin = false;
 
-            for (int i = 0; i < levels[0].peices.Count; i++)//every tile in board
+            for (int i = 0; i < levels[0].pieces.Count; i++)//every tile in board
             {
-                Vector3 translatedPos = new Vector3(child.GetChild(0).position.x, levels[0].peices[i].transform.position.y, child.GetChild(0).position.z);
+                Vector3 translatedPos = new Vector3(child.GetChild(0).position.x, levels[0].pieces[i].transform.position.y, child.GetChild(0).position.z);
 
-                float distance = Vector3.Distance(levels[0].peices[i].transform.position, translatedPos);
+                float distance = Vector3.Distance(levels[0].pieces[i].transform.position, translatedPos);
                 if (distance < HexMetrics.outerRadius)
                 {
                     currTileWithin = true;
@@ -70,17 +70,17 @@ public class BoardManager : MonoBehaviour
         return true;
     }
 
-    public bool LevelCellEmpty(int level, GameObject peice)
+    public bool LevelCellEmpty(int level, GameObject piece)
     {
         if (level == levels.Count)
         {
             return true;
         }
-        for (int i = 0; i < levels[level].peices.Count; i++)
+        for (int i = 0; i < levels[level].pieces.Count; i++)
         {
-            foreach (Transform child in peice.transform)
+            foreach (Transform child in piece.transform)
             {
-                float distance = Vector3.Distance(levels[level].peices[i].transform.position, child.GetChild(0).position);
+                float distance = Vector3.Distance(levels[level].pieces[i].transform.position, child.GetChild(0).position);
                 if (distance < HexMetrics.outerRadius)
                 {
                     return false;

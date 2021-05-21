@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5974328464344361026}
   - component: {fileID: 61813383684220267}
   m_Layer: 0
-  m_Name: Hex Peice Septuple
+  m_Name: 7 Hex Peice
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -53,6 +53,7 @@ MonoBehaviour:
   level: 0
   tileType: 0
   material: {fileID: -2310514774154243031, guid: 09c4a02ecbe985e44a80d41a9aa803b4, type: 3}
+  liquid: 0
 --- !u!1001 &3321535994424051559
 PrefabInstance:
   m_ObjectHideFlags: 0

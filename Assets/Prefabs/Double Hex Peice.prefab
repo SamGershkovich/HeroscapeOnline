@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 779571517990079383}
   - component: {fileID: 8861655174387663690}
   m_Layer: 0
-  m_Name: Hex Peice Double
+  m_Name: Double Hex Peice
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -48,6 +48,7 @@ MonoBehaviour:
   level: 0
   tileType: 0
   material: {fileID: -2310514774154243031, guid: 09c4a02ecbe985e44a80d41a9aa803b4, type: 3}
+  liquid: 0
 --- !u!1001 &2067518278357914304
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -12,25 +12,18 @@ public class HexGrid : MonoBehaviour
 	public BoardManager boardManager;
 	public GameObject cellPrefab;
 
-	HexCell[] cells;
-
-	public Text cellLabelPrefab;
-
 	void Awake()
 	{
-
-		cells = new HexCell[height * width];
-
-		for (int z = 0, i = 0; z < height; z++)
+		for (int z = 0; z < height; z++)
 		{
 			for (int x = 0; x < width; x++)
 			{
-				CreateCell(x, z, i++);
+				CreateCell(x, z);
 			}
 		}
 	}
 
-	void CreateCell(int x, int z, int i)
+	void CreateCell(int x, int z)
 	{
 		Vector3 position;
 		position.x = (x + z * 0.5f - z / 2) * (HexMetrics.innerRadius * 2f);
@@ -38,12 +31,7 @@ public class HexGrid : MonoBehaviour
 		position.z = z * (HexMetrics.outerRadius * 1.5f);
 
 		GameObject cellObj = Instantiate(cellPrefab);
-		HexCell cell = cells[i] = cellObj.GetComponentInChildren<HexCell>();
 		cellObj.transform.SetParent(transform, false);
 		cellObj.transform.localPosition = position;
-		cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
-
-		boardManager.AddPeice(0, cellObj);
-
 	}	
 }
