@@ -46,8 +46,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   level: 0
   tileType: 0
-  material: {fileID: 2100000, guid: 1742ea7b0c2741d428c0675fc79b8580, type: 2}
+  material: {fileID: 2100000, guid: 340fe8dc089d38044b1b8575c9214aa7, type: 2}
   liquid: 0
+  selected: 0
 --- !u!1001 &8746072704762198141
 PrefabInstance:
   m_ObjectHideFlags: 0

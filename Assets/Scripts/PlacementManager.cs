@@ -14,6 +14,7 @@ public class PlacementManager : MonoBehaviour
 
     HexPiece.TileType selectedTileType = HexPiece.TileType.Grass;
 
+    GameObject moveOrigin;
     GameObject guide = null;
     Material selectedMaterial;
 
@@ -27,10 +28,12 @@ public class PlacementManager : MonoBehaviour
     bool didMouseHit = false;
     int guideRotation = 0;
     bool hasGuide = false;
+    bool hasMover = false;
     bool isHovering = false;
     int tileValue = 0;
     int toolValue = 0;
     int biomeValue = 0;
+    float pinchedY = 0;
 
     public GameObject board;
     public GameObject selectGroup;
@@ -110,7 +113,7 @@ public class PlacementManager : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.Delete))
         {
-            if(selectedPieces.Count > 0)
+            if (selectedPieces.Count > 0)
             {
                 DeleteSelectedPieces();
             }
@@ -118,21 +121,55 @@ public class PlacementManager : MonoBehaviour
 
         GetBoardTouchPosition();
 
-        if (Input.GetMouseButtonDown(0) && didMouseHit && !UIManager.isHoveringUIElement)
+        if (didMouseHit && !UIManager.isHoveringUIElement)
         {
-            switch (toolValue)
+            if (Input.GetMouseButtonDown(0))
             {
-                case 0://Add
-                    PlacePiece();
-                    break;
-                case 1://Remove
-                    RemovePiece();
-                    break;
-                case 2://Select
-                    SelectPiece();
-                    break;
-                case 3://Move
-                    break;
+                switch (toolValue)
+                {
+                    case 0://Add
+                        PlacePiece();
+                        break;
+                    case 1://Remove
+                        RemovePiece();
+                        break;
+                    case 2://Select
+                        SelectPiece();
+                        break;
+                    case 3://Move
+                        pinchedY = touchedPiece.transform.position.y + 1.75f;
+                        break;
+                }
+            }
+            if (Input.GetMouseButton(0))
+            {
+                switch (toolValue)
+                {
+                    case 0://Add
+                        break;
+                    case 1://Remove
+                        break;
+                    case 2://Select
+                        break;
+                    case 3://Move
+                        MovePieces();
+                        break;
+                }
+            }
+            if (Input.GetMouseButtonUp(0))
+            {
+                switch (toolValue)
+                {
+                    case 0://Add
+                        break;
+                    case 1://Remove
+                        break;
+                    case 2://Select
+                        break;
+                    case 3://Move
+                        ClearMover();
+                        break;
+                }
             }
         }
     }
@@ -143,11 +180,14 @@ public class PlacementManager : MonoBehaviour
         Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(inputRay, out mouseHit, Mathf.Infinity, layerMask))
         {
-            Debug.DrawRay(mouseHit.point, Vector3.up, Color.red);
             didMouseHit = true;
             prevTouchedPiece = touchedPiece;
             touchedPiece = mouseHit.collider.transform.parent.parent.gameObject;
             currentTouchLevel = mouseHit.collider.transform.parent.parent.gameObject.GetComponent<HexPiece>().level;
+
+            prevPos = mousePos;
+            mousePos = mouseHit.collider.transform.position;
+            mousePos.y += 1.75f;
 
             GetToolModeHover(true);
         }
@@ -157,7 +197,7 @@ public class PlacementManager : MonoBehaviour
             GetToolModeHover(false);
         }
     }
-    
+
     public void GetToolModeHover(bool hover)
     {
         switch (toolValue)
@@ -175,25 +215,11 @@ public class PlacementManager : MonoBehaviour
                 break;
         }
     }
-   
+
     public void AddToolHover(bool hover)
     {
         if (hover)
         {
-            prevPos = mousePos;
-
-            /* if (currentTouchLevel != 0)
-             {*/
-            mousePos = mouseHit.collider.transform.position;
-            mousePos.y += 1.75f;
-            /*}
-            else
-            {
-                mousePos = mouseHit.point;
-                mousePos = new Vector3(mousePos.x / 15, mousePos.y, mousePos.z / 15);
-                mousePos.x = ((int)mousePos.x + (int)mousePos.z * 0.5f - (int)mousePos.z / 2) * (HexMetrics.innerRadius * 2f);
-                mousePos.z = (int)mousePos.z * (HexMetrics.outerRadius * 1.5f);
-            }*/
 
             MakeGuide();
 
@@ -326,7 +352,6 @@ public class PlacementManager : MonoBehaviour
             GetBoardTouchPosition();
         }
     }
-
     public void RemovePiece()
     {
         if (currentTouchLevel != 0)
@@ -375,14 +400,27 @@ public class PlacementManager : MonoBehaviour
                     touchedPiece.transform.SetParent(selectGroup.transform, true);
                 }
             }
-            
+
         }
     }
     public void RotateGroup(int dir)
     {
         if (selectedPieces.Count > 0)
         {
+
+            /* float totalX = 0;   
+             float totalZ = 0;
+
+             foreach(GameObject piece in selectedPieces)
+             {
+                 totalX += piece.transform.position.x;
+                 totalZ += piece.transform.position.z;
+             }
+             GameObject pivot = new GameObject();
+             pivot.transform.position = new Vector3(totalX / selectedPieces.Count, 0, totalZ / selectedPieces.Count) ;*/
+
             selectGroup.transform.RotateAround(selectedPieces[0].transform.position, transform.up, dir);
+
         }
     }
     public void DeselectGroup()
@@ -397,13 +435,38 @@ public class PlacementManager : MonoBehaviour
     }
     public void DeleteSelectedPieces()
     {
-        while(selectedPieces.Count > 0)
+        while (selectedPieces.Count > 0)
         {
             touchedPiece = selectedPieces[0];
             currentTouchLevel = touchedPiece.GetComponent<HexPiece>().level;
             selectedPieces.Remove(touchedPiece);
             RemovePiece();
-        }        
+        }
+    }
+
+    public void MovePieces()
+    {
+        if (selectedPieces.Count > 0)
+        {
+            if (!hasMover)
+            {
+                MakeMover();
+            }
+            moveOrigin.transform.position = new Vector3(mousePos.x, touchedPiece.transform.position.y + 1.75f, mousePos.z);
+        }
+    }
+    public void MakeMover()
+    {
+        moveOrigin = Instantiate(new GameObject("_Mover"), new Vector3(mousePos.x, pinchedY, mousePos.z), Quaternion.identity);
+        selectGroup.transform.SetParent(moveOrigin.transform, true);
+        hasMover = true;
+    }
+    public void ClearMover()
+    {
+        selectGroup.transform.SetParent(null, true);
+        Destroy(GameObject.Find("_Mover"));
+        Destroy(GameObject.Find("_Mover(Clone)"));
+        hasMover = false;
     }
 
     public void SelectTileType()
@@ -414,7 +477,7 @@ public class PlacementManager : MonoBehaviour
     public void SelectToolType()
     {
         toolValue = toolDropdown.value;
-        DeselectGroup();
+        //DeselectGroup();
     }
     public void SelectBiomeType()
     {

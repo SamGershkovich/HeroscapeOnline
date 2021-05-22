@@ -6,7 +6,6 @@ using UnityEngine;
 [RequireComponent(typeof(Camera))]
 public class CameraSpectator : MonoBehaviour
 {
-    public Transform container;
     public float moveSpeed;
     public float shiftAdditionalSpeed;
     public float mouseSensitivity;
@@ -27,9 +26,9 @@ public class CameraSpectator : MonoBehaviour
         if (Cursor.lockState == CursorLockMode.Locked)
         {
             float speed = (moveSpeed + (Input.GetAxis("Fire3") * shiftAdditionalSpeed));
-            gameObject.transform.Translate(container.forward * speed * Input.GetAxis("Vertical"));
-            gameObject.transform.Translate(container.right * speed * Input.GetAxis("Horizontal"));
-            gameObject.transform.Translate(container.up * speed * (Input.GetAxis("Jump") + (Input.GetAxis("Fire1") * -1)));
+            gameObject.transform.Translate(Vector3.forward * speed * Input.GetAxis("Vertical"));
+            gameObject.transform.Translate(Vector3.right * speed * Input.GetAxis("Horizontal"));
+            gameObject.transform.Translate(Vector3.up * speed * (Input.GetAxis("Jump") + (Input.GetAxis("Fire1") * -1)));
             gameObject.transform.Rotate(Input.GetAxis("Mouse Y") * mouseSensitivity * ((invertMouse) ? 1 : -1), Input.GetAxis("Mouse X") * mouseSensitivity * ((invertMouse) ? -1 : 1), 0);
             gameObject.transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, transform.localEulerAngles.y, 0);
         }
