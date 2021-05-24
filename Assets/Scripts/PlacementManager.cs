@@ -22,19 +22,22 @@ public class PlacementManager : MonoBehaviour
     GameObject touchedPiece;
     RaycastHit mouseHit;
 
+    public Camera cam;
+
     public List<GameObject> selectedPieces = new List<GameObject>();
 
-
+    float touchedPieceHeight = 0;
     bool didMouseHit = false;
     int guideRotation = 0;
     bool hasGuide = false;
     bool hasMover = false;
-    bool isHovering = false;
+    //bool isHovering = false;
     int tileValue = 0;
     int toolValue = 0;
     int biomeValue = 0;
-    float pinchedY = 0;
+    //float pinchedY = 0;
 
+    public Transform terrainParent;
     public GameObject board;
     public GameObject selectGroup;
 
@@ -137,7 +140,7 @@ public class PlacementManager : MonoBehaviour
                         SelectPiece();
                         break;
                     case 3://Move
-                        pinchedY = touchedPiece.transform.position.y + 1.75f;
+                        //pinchedY = touchedPiece.transform.position.y + touchedPieceHeight;
                         break;
                 }
             }
@@ -168,6 +171,13 @@ public class PlacementManager : MonoBehaviour
                         break;
                     case 3://Move
                         ClearMover();
+                        foreach (GameObject go in selectedPieces)
+                        {
+                            foreach (Transform child in go.transform)
+                            {
+                                child.GetChild(0).gameObject.layer = 6;
+                            }
+                        }
                         break;
                 }
             }
@@ -177,7 +187,7 @@ public class PlacementManager : MonoBehaviour
     public void GetBoardTouchPosition()
     {
         int layerMask = 1 << 6;
-        Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Ray inputRay = cam.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(inputRay, out mouseHit, Mathf.Infinity, layerMask))
         {
             didMouseHit = true;
@@ -185,9 +195,11 @@ public class PlacementManager : MonoBehaviour
             touchedPiece = mouseHit.collider.transform.parent.parent.gameObject;
             currentTouchLevel = mouseHit.collider.transform.parent.parent.gameObject.GetComponent<HexPiece>().level;
 
+            touchedPieceHeight = touchedPiece.GetComponent<HexPiece>().height;
+
             prevPos = mousePos;
             mousePos = mouseHit.collider.transform.position;
-            mousePos.y += 1.75f;
+            mousePos.y += touchedPieceHeight;
 
             GetToolModeHover(true);
         }
@@ -345,6 +357,7 @@ public class PlacementManager : MonoBehaviour
             newPiece.GetComponent<HexPiece>().SetMaterial(selectedMaterial);
             newPiece.GetComponent<HexPiece>().liquid = placeLiquid;
             newPiece.GetComponent<HexPiece>().tileType = selectedTileType;
+            newPiece.transform.SetParent(terrainParent, true);
 
             boardManager.AddPiece(currentTouchLevel + 1, newPiece);
 
@@ -372,7 +385,7 @@ public class PlacementManager : MonoBehaviour
                     touchedPiece.GetComponent<HexPiece>().selected = false;
                     touchedPiece.GetComponent<HexPiece>().DeSelect();
                     selectedPieces.Remove(touchedPiece);
-                    touchedPiece.transform.SetParent(null, true);
+                    touchedPiece.transform.SetParent(terrainParent, true);
                 }
                 else
                 {
@@ -390,7 +403,7 @@ public class PlacementManager : MonoBehaviour
                     touchedPiece.GetComponent<HexPiece>().selected = false;
                     touchedPiece.GetComponent<HexPiece>().DeSelect();
                     selectedPieces.Remove(touchedPiece);
-                    touchedPiece.transform.SetParent(null, true);
+                    touchedPiece.transform.SetParent(terrainParent, true);
                 }
                 else
                 {
@@ -429,7 +442,7 @@ public class PlacementManager : MonoBehaviour
         {
             piece.GetComponent<HexPiece>().selected = false;
             piece.GetComponent<HexPiece>().DeSelect();
-            piece.transform.SetParent(null, true);
+            piece.transform.SetParent(terrainParent, true);
         }
         selectedPieces.Clear();
     }
@@ -452,12 +465,28 @@ public class PlacementManager : MonoBehaviour
             {
                 MakeMover();
             }
-            moveOrigin.transform.position = new Vector3(mousePos.x, touchedPiece.transform.position.y + 1.75f, mousePos.z);
+            foreach (GameObject go in selectedPieces)
+            {
+                foreach (Transform child in go.transform)
+                {
+                    child.GetChild(0).gameObject.layer = 3;
+                }
+            }
+
+            moveOrigin.transform.position = new Vector3(mousePos.x, touchedPiece.transform.position.y + touchedPieceHeight, mousePos.z);
         }
     }
     public void MakeMover()
     {
-        moveOrigin = Instantiate(new GameObject("_Mover"), new Vector3(mousePos.x, pinchedY, mousePos.z), Quaternion.identity);
+        float yPos = Mathf.Infinity;
+        foreach (GameObject piece in selectedPieces)
+        {
+            if (piece.transform.position.y < yPos)
+            {
+                yPos = piece.transform.position.y;
+            }
+        }
+        moveOrigin = Instantiate(new GameObject("_Mover"), new Vector3(mousePos.x, yPos, mousePos.z), Quaternion.identity);
         selectGroup.transform.SetParent(moveOrigin.transform, true);
         hasMover = true;
     }

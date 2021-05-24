@@ -17,7 +17,6 @@ public class CameraSpectator : MonoBehaviour
     void Start()
     {
         cam = gameObject.GetComponent<Camera>();
-        gameObject.name = "SpectatorCamera";
         Cursor.lockState = (autoLockCursor) ? CursorLockMode.Locked : CursorLockMode.None;
     }
 

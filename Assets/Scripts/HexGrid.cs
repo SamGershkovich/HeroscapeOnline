@@ -9,6 +9,8 @@ public class HexGrid : MonoBehaviour
 	public int width = 6;
 	public int height = 6;
 
+	public Transform _base;
+
 	public BoardManager boardManager;
 	public GameObject cellPrefab;
 
@@ -31,7 +33,7 @@ public class HexGrid : MonoBehaviour
 		position.z = z * (HexMetrics.outerRadius * 1.5f);
 
 		GameObject cellObj = Instantiate(cellPrefab);
-		cellObj.transform.SetParent(transform, false);
+		cellObj.transform.SetParent(_base, false);
 		cellObj.transform.localPosition = position;
 	}	
 }

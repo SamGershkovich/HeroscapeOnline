@@ -25,6 +25,7 @@ public class HexPiece : MonoBehaviour
     };
 
     public TileType tileType = TileType.Grass;
+    public float height = 1;
     public Material material;
     public bool liquid = false;
     public bool selected = false;

@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8913014361415685340
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3882609050429356520}
+  - component: {fileID: 3771071980672056926}
+  m_Layer: 0
+  m_Name: Finn the Viking Champion
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3882609050429356520
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8913014361415685340}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 496.21863, y: 781.1414, z: -146.7943}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3771071980672056926
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8913014361415685340}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 988d41c769fdf724abdd90aa2372145f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _general: 0
+  _homeWorld: 1
+  _species: 10
+  _type: 3
+  _class: 8
+  _personality: 28
+  _size: 1
+  _base: 0
+  Name: Finn the Viking Champion
+  Life: 4
+  Move: 5
+  Range: 1
+  Attack: 3
+  Defense: 4
+  numberOfUnits: 1
+  Height: 5
+  Points: 80
+  Powers:
+  - {fileID: 2607145620429993653, guid: db801e92a20a0ee4b8177e036c2e23ed, type: 3}
+  - {fileID: 3799344254798698818, guid: 1a2622369fd64194d809104453338062, type: 3}

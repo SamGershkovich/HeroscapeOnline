@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4082347186563207033
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1994632076724728532}
+  - component: {fileID: 4984188867150641925}
+  m_Layer: 0
+  m_Name: Marro Warriors
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1994632076724728532
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4082347186563207033}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 496.21863, y: 781.1414, z: -146.7943}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4984188867150641925
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4082347186563207033}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 988d41c769fdf724abdd90aa2372145f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _general: 5
+  _homeWorld: 7
+  _species: 14
+  _type: 4
+  _class: 55
+  _personality: 29
+  _size: 1
+  _base: 0
+  Name: Marro Warriors
+  Life: 1
+  Move: 6
+  Range: 6
+  Attack: 2
+  Defense: 3
+  numberOfUnits: 4
+  Height: 4
+  Points: 50
+  Powers:
+  - {fileID: 6623541509631487270, guid: 57f00b54082af324fa9d63dd2f79beb9, type: 3}

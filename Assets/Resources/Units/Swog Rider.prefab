@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6865832521915097933
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2350967501359995443}
+  - component: {fileID: 1219085584437911098}
+  m_Layer: 0
+  m_Name: Swog Rider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2350967501359995443
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6865832521915097933}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 496.21863, y: 781.1414, z: -146.7943}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1219085584437911098
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6865832521915097933}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 988d41c769fdf724abdd90aa2372145f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _general: 5
+  _homeWorld: 4
+  _species: 16
+  _type: 0
+  _class: 6
+  _personality: 29
+  _size: 2
+  _base: 1
+  Name: Swog Rider
+  Life: 1
+  Move: 8
+  Range: 1
+  Attack: 3
+  Defense: 3
+  numberOfUnits: 1
+  Height: 6
+  Points: 25
+  Powers:
+  - {fileID: 1243639867277795371, guid: 403dc6f384798ce4bad5e00d854f0608, type: 3}
+  - {fileID: 4453585064100974332, guid: 7d790d3752f3fdd428512d4b3de24aa1, type: 3}
