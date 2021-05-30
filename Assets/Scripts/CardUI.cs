@@ -12,6 +12,7 @@ public class CardUI : MonoBehaviour
     public int amountTaken;
 
     public Text nameText;
+    public Text pointsText;
     public Button takeButton;
 
     public void SetCard(ArmyCard card, GameManager manager)
@@ -19,6 +20,7 @@ public class CardUI : MonoBehaviour
         this.card = card;
         this.manager = manager;
         nameText.text = card.Name;
+        pointsText.text = card.Points + " pts";
     }
 
     public void ViewCard()
@@ -29,7 +31,9 @@ public class CardUI : MonoBehaviour
     public void TakeCard(bool doAdd)
     {
         amountTaken++;
-        takeButton.interactable = manager.TakeCard(this, doAdd);       
+        manager.TakeCard(this, doAdd);
+        takeButton.interactable = !(card._type == ArmyCard.Type.UniqueHero || card._type == ArmyCard.Type.UniqueSquad) || (card._type == ArmyCard.Type.UniqueHero || card._type == ArmyCard.Type.UniqueSquad) && amountTaken == 0;
+
     }
 
     public void PutBackCard()

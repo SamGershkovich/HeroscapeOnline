@@ -202,6 +202,10 @@ public class ArmyCard : MonoBehaviour
 
     public List<Power> Powers = new List<Power>();
 
+    public GameObject model;
+
+    public bool isFiltered = true;
+
 
 
 }

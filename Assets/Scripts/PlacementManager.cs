@@ -10,7 +10,11 @@ public class PlacementManager : MonoBehaviour
 
     int currentTouchLevel = 0;
 
+    int startZoneID = 0;
+
     bool placeLiquid = false;
+    public bool placingStartZones = false;
+    public bool touchingStartZoneTile = false;
 
     HexPiece.TileType selectedTileType = HexPiece.TileType.Grass;
 
@@ -25,19 +29,21 @@ public class PlacementManager : MonoBehaviour
     public Camera cam;
 
     public List<GameObject> selectedPieces = new List<GameObject>();
+    public List<GameObject> startZones = new List<GameObject>();
 
     float touchedPieceHeight = 0;
     bool didMouseHit = false;
     int guideRotation = 0;
     bool hasGuide = false;
     bool hasMover = false;
-    //bool isHovering = false;
     int tileValue = 0;
-    int toolValue = 0;
+    public int toolValue = 0;
     int biomeValue = 0;
-    //float pinchedY = 0;
 
+    public Text numMapPlayers;
+    public Dropdown mapPlayersStartZoneDropdown;
     public Transform terrainParent;
+    public Transform startZoneParent;
     public GameObject board;
     public GameObject selectGroup;
 
@@ -46,6 +52,8 @@ public class PlacementManager : MonoBehaviour
     public Dropdown biomeDropdown;
     public BoardManager boardManager;
 
+    public GameObject startZone;
+    public GameObject startZoneTile;
     public GameObject liquidTile;
     public GameObject singleTile;
     public GameObject doubleTile;
@@ -69,6 +77,7 @@ public class PlacementManager : MonoBehaviour
     public Material swampWaterMat;
     public Material waterMat;
 
+    public Material startZoneMat;
     public Material hoverMaterial;
 
     private void Start()
@@ -193,9 +202,14 @@ public class PlacementManager : MonoBehaviour
             didMouseHit = true;
             prevTouchedPiece = touchedPiece;
             touchedPiece = mouseHit.collider.transform.parent.parent.gameObject;
-            currentTouchLevel = mouseHit.collider.transform.parent.parent.gameObject.GetComponent<HexPiece>().level;
 
-            touchedPieceHeight = touchedPiece.GetComponent<HexPiece>().height;
+            touchingStartZoneTile = touchedPiece.GetComponent<HexPiece>() == null;
+
+            if (!touchingStartZoneTile)
+            {
+                currentTouchLevel = mouseHit.collider.transform.parent.parent.gameObject.GetComponent<HexPiece>().level;
+                touchedPieceHeight = touchedPiece.GetComponent<HexPiece>().height;
+            }
 
             prevPos = mousePos;
             mousePos = mouseHit.collider.transform.position;
@@ -230,7 +244,7 @@ public class PlacementManager : MonoBehaviour
 
     public void AddToolHover(bool hover)
     {
-        if (hover)
+        if (hover && !touchingStartZoneTile)
         {
 
             MakeGuide();
@@ -255,7 +269,15 @@ public class PlacementManager : MonoBehaviour
     }
     public void RemoveToolHover(bool hover)
     {
-        if (currentTouchLevel != 0 && hover)
+        if (placingStartZones && hover)
+        {
+            if (prevTouchedPiece)
+            {
+                prevTouchedPiece.GetComponent<StartZoneTile>().DeSelect();
+            }
+            touchedPiece.GetComponent<StartZoneTile>().Select(hoverMaterial);
+        }
+        else if (currentTouchLevel != 0 && !placingStartZones && hover)
         {
             if (prevTouchedPiece)
             {
@@ -265,17 +287,38 @@ public class PlacementManager : MonoBehaviour
         }
         else
         {
-            if (prevTouchedPiece)
+            if (placingStartZones && touchingStartZoneTile)
             {
-                prevTouchedPiece.GetComponent<HexPiece>().DeSelect();
+                if (prevTouchedPiece)
+                {
+                    prevTouchedPiece.GetComponent<StartZoneTile>().DeSelect();
+                }
+                touchedPiece.GetComponent<StartZoneTile>().DeSelect();
             }
-            touchedPiece.GetComponent<HexPiece>().DeSelect();
+            else
+            {
+                if (prevTouchedPiece)
+                {
+                    prevTouchedPiece.GetComponent<HexPiece>().DeSelect();
+                }
+                touchedPiece.GetComponent<HexPiece>().DeSelect();
+            }
+
+
         }
 
     }
     public void SelectToolHover(bool hover)
     {
-        if (currentTouchLevel != 0 && hover)
+        if (placingStartZones && hover)
+        {
+            if (prevTouchedPiece && !prevTouchedPiece.GetComponent<StartZoneTile>().selected)
+            {
+                prevTouchedPiece.GetComponent<StartZoneTile>().DeSelect();
+            }
+            touchedPiece.GetComponent<StartZoneTile>().Select(hoverMaterial);
+        }
+        else if (currentTouchLevel != 0 && !placingStartZones && hover)
         {
             if (prevTouchedPiece && !prevTouchedPiece.GetComponent<HexPiece>().selected)
             {
@@ -285,14 +328,27 @@ public class PlacementManager : MonoBehaviour
         }
         else
         {
-
-            if (prevTouchedPiece && !prevTouchedPiece.GetComponent<HexPiece>().selected)
+            if (placingStartZones)
             {
-                prevTouchedPiece.GetComponent<HexPiece>().DeSelect();
+                if (prevTouchedPiece && !prevTouchedPiece.GetComponent<StartZoneTile>().selected)
+                {
+                    prevTouchedPiece.GetComponent<StartZoneTile>().DeSelect();
+                }
+                if (!touchedPiece.GetComponent<StartZoneTile>().selected)
+                {
+                    touchedPiece.GetComponent<StartZoneTile>().DeSelect();
+                }
             }
-            if (!touchedPiece.GetComponent<HexPiece>().selected)
+            else
             {
-                touchedPiece.GetComponent<HexPiece>().DeSelect();
+                if (prevTouchedPiece && !prevTouchedPiece.GetComponent<HexPiece>().selected)
+                {
+                    prevTouchedPiece.GetComponent<HexPiece>().DeSelect();
+                }
+                if (!touchedPiece.GetComponent<HexPiece>().selected)
+                {
+                    touchedPiece.GetComponent<HexPiece>().DeSelect();
+                }
             }
         }
 
@@ -308,9 +364,16 @@ public class PlacementManager : MonoBehaviour
         if (!hasGuide)
         {
             hasGuide = true;
-            if (placeLiquid)
+            if (placingStartZones)
+            {
+                guide = Instantiate(startZoneTile, prevPos, Quaternion.Euler(new Vector3(0, guideRotation, 0)));
+                guide.GetComponent<StartZoneTile>().SetMaterial(startZones[startZoneID].GetComponent<StartZone>().zoneMat);
+
+            }
+            else if (placeLiquid)
             {
                 guide = Instantiate(liquidTile, prevPos, Quaternion.Euler(new Vector3(0, guideRotation, 0)));
+                guide.GetComponent<StartZoneTile>().SetMaterial(startZoneMat);
             }
             else
             {
@@ -334,7 +397,8 @@ public class PlacementManager : MonoBehaviour
                 }
             }
 
-            guide.GetComponent<HexPiece>().SetMaterial(selectedMaterial);
+            if (!placingStartZones)
+                guide.GetComponent<HexPiece>().SetMaterial(selectedMaterial);
 
             foreach (Transform child in guide.transform)
             {
@@ -350,24 +414,39 @@ public class PlacementManager : MonoBehaviour
 
             foreach (Transform child in newPiece.transform)
             {
-                child.GetChild(0).gameObject.layer = 6;
+                int layer = 6;
+                child.GetChild(0).gameObject.layer = layer;
             }
 
-            newPiece.GetComponent<HexPiece>().level = currentTouchLevel + 1;
-            newPiece.GetComponent<HexPiece>().SetMaterial(selectedMaterial);
-            newPiece.GetComponent<HexPiece>().liquid = placeLiquid;
-            newPiece.GetComponent<HexPiece>().tileType = selectedTileType;
-            newPiece.transform.SetParent(terrainParent, true);
+            if (placingStartZones)
+            {
+                newPiece.GetComponent<StartZoneTile>().Setup(currentTouchLevel, startZoneID);
 
-            boardManager.AddPiece(currentTouchLevel + 1, newPiece);
+                newPiece.transform.SetParent(startZones[startZoneID].transform, true);
+                startZones[startZoneID].GetComponent<StartZone>().tiles.Add(newPiece);
+            }
+            else
+            {
+                newPiece.GetComponent<HexPiece>().level = currentTouchLevel + 1;
+                newPiece.GetComponent<HexPiece>().SetMaterial(selectedMaterial);
+                newPiece.GetComponent<HexPiece>().liquid = placeLiquid;
+                newPiece.GetComponent<HexPiece>().tileType = selectedTileType;
+                newPiece.transform.SetParent(terrainParent, true);
 
+                boardManager.AddPiece(currentTouchLevel + 1, newPiece);
+            }
             ClearGuide();
             GetBoardTouchPosition();
         }
     }
     public void RemovePiece()
     {
-        if (currentTouchLevel != 0)
+        if (placingStartZones)
+        {
+            Destroy(touchedPiece);
+            startZones[startZoneID].GetComponent<StartZone>().tiles.Remove(touchedPiece);
+        }
+        else if (currentTouchLevel != 0)
         {
             boardManager.RemovePiece(currentTouchLevel, touchedPiece);
             Destroy(touchedPiece);
@@ -376,7 +455,45 @@ public class PlacementManager : MonoBehaviour
 
     public void SelectPiece()
     {
-        if (currentTouchLevel != 0)
+        if (placingStartZones)
+        {
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                if (touchedPiece.GetComponent<StartZoneTile>().selected)
+                {
+                    touchedPiece.GetComponent<StartZoneTile>().selected = false;
+                    touchedPiece.GetComponent<StartZoneTile>().DeSelect();
+                    selectedPieces.Remove(touchedPiece);
+                    touchedPiece.transform.SetParent(startZones[touchedPiece.GetComponent<StartZoneTile>().playerID].transform, true);
+                }
+                else
+                {
+                    touchedPiece.GetComponent<StartZoneTile>().selected = true;
+                    touchedPiece.GetComponent<StartZoneTile>().Select(hoverMaterial);
+                    selectedPieces.Add(touchedPiece);
+                    touchedPiece.transform.SetParent(selectGroup.transform, true);
+                }
+            }
+            else
+            {
+                DeselectGroup();
+                if (touchedPiece.GetComponent<StartZoneTile>().selected)
+                {
+                    touchedPiece.GetComponent<StartZoneTile>().selected = false;
+                    touchedPiece.GetComponent<StartZoneTile>().DeSelect();
+                    selectedPieces.Remove(touchedPiece);
+                    touchedPiece.transform.SetParent(startZones[touchedPiece.GetComponent<StartZoneTile>().playerID].transform, true);
+                }
+                else
+                {
+                    touchedPiece.GetComponent<StartZoneTile>().selected = true;
+                    touchedPiece.GetComponent<StartZoneTile>().Select(hoverMaterial);
+                    selectedPieces.Add(touchedPiece);
+                    touchedPiece.transform.SetParent(selectGroup.transform, true);
+                }
+            }
+        }
+        else if (currentTouchLevel != 0)
         {
             if (Input.GetKey(KeyCode.LeftShift))
             {
@@ -413,7 +530,6 @@ public class PlacementManager : MonoBehaviour
                     touchedPiece.transform.SetParent(selectGroup.transform, true);
                 }
             }
-
         }
     }
     public void RotateGroup(int dir)
@@ -440,9 +556,18 @@ public class PlacementManager : MonoBehaviour
     {
         foreach (GameObject piece in selectedPieces)
         {
-            piece.GetComponent<HexPiece>().selected = false;
-            piece.GetComponent<HexPiece>().DeSelect();
-            piece.transform.SetParent(terrainParent, true);
+            if (placingStartZones)
+            {
+                piece.GetComponent<StartZoneTile>().selected = false;
+                piece.GetComponent<StartZoneTile>().DeSelect();
+                piece.transform.SetParent(startZones[piece.GetComponent<StartZoneTile>().playerID].transform, true);
+            }
+            else
+            {
+                piece.GetComponent<HexPiece>().selected = false;
+                piece.GetComponent<HexPiece>().DeSelect();
+                piece.transform.SetParent(terrainParent, true);
+            }
         }
         selectedPieces.Clear();
     }
@@ -450,10 +575,19 @@ public class PlacementManager : MonoBehaviour
     {
         while (selectedPieces.Count > 0)
         {
-            touchedPiece = selectedPieces[0];
-            currentTouchLevel = touchedPiece.GetComponent<HexPiece>().level;
-            selectedPieces.Remove(touchedPiece);
-            RemovePiece();
+            if (placingStartZones)
+            {
+                touchedPiece = selectedPieces[0];
+                selectedPieces.Remove(touchedPiece);
+                RemovePiece();
+            }
+            else
+            {
+                touchedPiece = selectedPieces[0];
+                currentTouchLevel = touchedPiece.GetComponent<HexPiece>().level;
+                selectedPieces.Remove(touchedPiece);
+                RemovePiece();
+            }
         }
     }
 
@@ -503,9 +637,9 @@ public class PlacementManager : MonoBehaviour
         ClearGuide();
         tileValue = tileDropdown.value;
     }
-    public void SelectToolType()
+    public void SelectToolType(Dropdown drop)
     {
-        toolValue = toolDropdown.value;
+        toolValue = drop.value;
         //DeselectGroup();
     }
     public void SelectBiomeType()
@@ -591,5 +725,50 @@ public class PlacementManager : MonoBehaviour
                 break;
         }
     }
+
+    public void PlacingStartZones(bool placing)
+    {
+        placingStartZones = placing;
+    }
+
+    public void MakePlayerStartZoneDropdown()
+    {
+        int numPlayers = int.Parse(numMapPlayers.text);
+
+        if (numPlayers < startZones.Count)
+        {
+            while (startZones.Count > numPlayers)
+            {
+                Destroy(startZones[startZones.Count - 1]);
+                startZones.RemoveAt(startZones.Count - 1);
+            }
+        }
+        else if (numPlayers > startZones.Count)
+        {
+            while (startZones.Count < numPlayers)
+            {
+                GameObject newStartZone = Instantiate(startZone, new Vector3(0, 0, 0), Quaternion.identity);
+                newStartZone.name = "Start Zone " + (startZones.Count + 1);
+                newStartZone.transform.SetParent(startZoneParent, true);
+                newStartZone.GetComponent<StartZone>().SetMaterial();
+                startZones.Add(newStartZone);
+            }
+        }
+
+        mapPlayersStartZoneDropdown.ClearOptions();
+        List<string> dropOptions = new List<string>();
+        for (int i = 0; i < numPlayers; i++)
+        {
+            dropOptions.Add("Player " + (i + 1) + " Start Zone");
+        }
+        mapPlayersStartZoneDropdown.AddOptions(dropOptions);
+        startZoneID = 0;
+    }
+
+    public void SelectPlayerStartZone()
+    {
+        startZoneID = mapPlayersStartZoneDropdown.value;
+    }
+
 }
 

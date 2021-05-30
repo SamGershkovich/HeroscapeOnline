@@ -60,6 +60,9 @@ MonoBehaviour:
   numberOfUnits: 1
   Height: 6
   Points: 25
+  totalAmountDrafted: 0
   Powers:
   - {fileID: 1243639867277795371, guid: 403dc6f384798ce4bad5e00d854f0608, type: 3}
   - {fileID: 4453585064100974332, guid: 7d790d3752f3fdd428512d4b3de24aa1, type: 3}
+  model: {fileID: 1942641328178696764, guid: 6cfc05483bdb50742a99a950d293ee21, type: 3}
+  isFiltered: 1

@@ -6,7 +6,6 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
     public List<GameObject> units = new List<GameObject>();
-    public List<GameObject> filteredUnits = new List<GameObject>();
 
     List<string> generalFilterList = new List<string>();
     List<string> homeWorldFilterList = new List<string>();
@@ -17,29 +16,29 @@ public class GameManager : MonoBehaviour
     List<string> sizeFilterList = new List<string>();
     List<string> baseFilterList = new List<string>();
 
-    int lifeMinFilter;
-    int lifeMaxFilter;
+    int lifeMinFilter = 0;
+    int lifeMaxFilter = 0;
 
-    int moveMinFilter;
-    int moveMaxFilter;
+    int moveMinFilter = 0;
+    int moveMaxFilter = 0;
 
-    int rangeMinFilter;
-    int rangeMaxFilter;
+    int rangeMinFilter = 0;
+    int rangeMaxFilter = 0;
 
-    int attackMinFilter;
-    int attackMaxFilter;
+    int attackMinFilter = 0;
+    int attackMaxFilter = 0;
 
-    int defenseMinFilter;
-    int defenseMaxFilter;
+    int defenseMinFilter = 0;
+    int defenseMaxFilter = 0;
 
-    int numberOfUnitsMinFilter;
-    int numberOfUnitsMaxFilter;
+    int numberOfUnitsMinFilter = 0;
+    int numberOfUnitsMaxFilter = 0;
 
-    int heightMinFilter;
-    int heightMaxFilter;
+    int heightMinFilter = 0;
+    int heightMaxFilter = 0;
 
-    int pointsMinFilter;
-    int pointsMaxFilter;
+    int pointsMinFilter = 0;
+    int pointsMaxFilter = 0;
 
 
     public Canvas mainCanvas;
@@ -50,8 +49,12 @@ public class GameManager : MonoBehaviour
 
     public GameObject mainCamera;
     public GameObject board;
+    public GameObject boardBase;
 
     public GameObject mapBuilderUI;
+
+    public GameObject mapPlayerSettings;
+
 
     public GameObject preGameSettingsUI;
     public Transform playerInfos;
@@ -65,6 +68,7 @@ public class GameManager : MonoBehaviour
     public GameObject armyCardUI;
     public Button startGameButton;
     public Canvas armyBuilderCanvas;
+    public Text filteredCardsText;
     List<bool> readyStates = new List<bool>();
     Player currentBuildPlayer;
     public Text armyCardCountText;
@@ -72,6 +76,8 @@ public class GameManager : MonoBehaviour
     public List<GameObject> armyViewList = new List<GameObject>();
     public List<GameObject> unitViewList = new List<GameObject>();
     public List<GameObject> tempArmyList = new List<GameObject>();
+    public List<GameObject> tempUnitList = new List<GameObject>();
+    public int numFilteredCards = 0;
 
     public int numPlayers;
     public int armyPoints;
@@ -86,6 +92,20 @@ public class GameManager : MonoBehaviour
             units.Add(unit);
         }
 
+    }
+
+    public void ShowTerrainBuilderUI()
+    {
+        boardBase.SetActive(true);
+        mapBuilderUI.SetActive(true);
+        mapPlayerSettings.SetActive(false);
+    }
+
+    public void MapPlayerSettings()
+    {
+        boardBase.SetActive(false);
+        mapBuilderUI.SetActive(false);
+        mapPlayerSettings.SetActive(true);
     }
 
     public void PreSettings()
@@ -137,29 +157,24 @@ public class GameManager : MonoBehaviour
         currentBuildPlayer = player;
         int cardCount = currentBuildPlayer.army.Count;
 
-
         ClearUnitViewList();
         ClearArmyViewList();
 
         FilterUnits();
 
         int counter = 0;
-        if (filteredUnits.Count > 0)
+
+        foreach (GameObject card in units)
         {
-            foreach (GameObject card in filteredUnits)
+            SetArmyListUIs(card, counter);
+
+            if (card.GetComponent<ArmyCard>().isFiltered)
             {
-                SetArmyListUIs(card, counter);
+                //card.gameObject.transform.localPosition = new Vector3(225, -50 + counter * -75, 0);
                 counter++;
             }
         }
-        else
-        {
-            foreach (GameObject card in units)
-            {
-                SetArmyListUIs(card, counter);
-                counter++;
-            }
-        }
+
 
         foreach (ArmyCard card in currentBuildPlayer.army)
         {
@@ -192,6 +207,8 @@ public class GameManager : MonoBehaviour
         newCardUI.transform.SetParent(unitViewContainer, false);
         newCardUI.transform.localPosition = new Vector3(225, -50 + counter * -75, 0);
 
+        newCardUI.SetActive(card.GetComponent<ArmyCard>().isFiltered);
+
         unitViewContainer.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 100 * counter);
 
 
@@ -205,7 +222,7 @@ public class GameManager : MonoBehaviour
         unitViewList.Add(newCardUI);
     }
 
-    public bool TakeCard(CardUI cardUI, bool doAdd)
+    public void TakeCard(CardUI cardUI, bool doAdd)
     {
         bool inDeck = false;
         bool inArmyList = false;
@@ -266,15 +283,15 @@ public class GameManager : MonoBehaviour
 
         cardUI.armyCardUI.TakeCard();
 
-
-        return !(thisCard._type == ArmyCard.Type.UniqueHero || thisCard._type == ArmyCard.Type.UniqueSquad) || (thisCard._type == ArmyCard.Type.UniqueHero || thisCard._type == ArmyCard.Type.UniqueSquad) && amountTaken == 0;
+        if (doAdd)
+            ShowFilteredCards();
     }
 
     public void PutBackCard(ArmyCardUI armyCardUI, bool lastOne)
     {
         currentBuildPlayer.RemoveCard(armyCardUI.card);
         armyCardUI.linkedUI.PutBackCard();
-        
+
         if (lastOne)
         {
             armyViewList.Remove(armyCardUI.gameObject);
@@ -290,6 +307,24 @@ public class GameManager : MonoBehaviour
         {
             ui.transform.localPosition = new Vector3(225, -50 + counter * -75, 0);
             counter++;
+        }
+
+        ShowFilteredCards();
+    }
+
+    public void ShowFilteredCards()
+    {
+        FilterUnits();
+        int counter = 0;
+        foreach (GameObject ui in unitViewList)
+        {
+            ui.SetActive(ui.GetComponent<CardUI>().card.isFiltered);
+
+            if (ui.GetComponent<CardUI>().card.isFiltered)
+            {
+                ui.transform.localPosition = new Vector3(225, -50 + counter * -75, 0);
+                counter++;
+            }
         }
     }
 
@@ -313,83 +348,119 @@ public class GameManager : MonoBehaviour
 
     public void FilterUnits()
     {
-        filteredUnits.Clear();
+        numFilteredCards = 0;
         foreach (GameObject unit in units)
         {
             ArmyCard card = unit.GetComponent<ArmyCard>();
 
             bool addToFilter = true;
 
-            if (generalFilterList.Count > 0 && !generalFilterList.Contains(card._general.ToString()))
+            if (card.Points > (currentBuildPlayer.maxArmyPoints - currentBuildPlayer.armyPoints))
+            {
+                print(card.Name + " " + 1);
+                addToFilter = false;
+            }
+            else if (generalFilterList.Count > 0 && !generalFilterList.Contains(card._general.ToString()))
+            {
+                print(card.Name + " " + 2);
+
+                addToFilter = false;
+            }
+            else if (homeWorldFilterList.Count > 0 && !homeWorldFilterList.Contains(card._homeWorld.ToString()))
             {
                 addToFilter = false;
             }
-            if (homeWorldFilterList.Count > 0 && !homeWorldFilterList.Contains(card._homeWorld.ToString()))
+            else if (speciesFilterList.Count > 0 && !speciesFilterList.Contains(card._species.ToString()))
             {
+                print(card.Name + " " + 3);
+
                 addToFilter = false;
             }
-            if (speciesFilterList.Count > 0 && !speciesFilterList.Contains(card._species.ToString()))
+            else if (typeFilterList.Count > 0 && !typeFilterList.Contains(card._type.ToString()))
             {
+                print(card.Name + " " + 4);
+
                 addToFilter = false;
             }
-            if (typeFilterList.Count > 0 && !typeFilterList.Contains(card._type.ToString()))
+            else if (classFilterList.Count > 0 && !classFilterList.Contains(card._class.ToString()))
             {
+                print(card.Name + " " + 5);
+
                 addToFilter = false;
             }
-            if (classFilterList.Count > 0 && !classFilterList.Contains(card._class.ToString()))
+            else if (personalityFilterList.Count > 0 && !personalityFilterList.Contains(card._personality.ToString()))
             {
+                print(card.Name + " " + 6);
+
                 addToFilter = false;
             }
-            if (personalityFilterList.Count > 0 && !personalityFilterList.Contains(card._personality.ToString()))
+            else if (sizeFilterList.Count > 0 && !sizeFilterList.Contains(card._size.ToString()))
             {
+                print(card.Name + " " + 7);
+
                 addToFilter = false;
             }
-            if (sizeFilterList.Count > 0 && !sizeFilterList.Contains(card._size.ToString()))
+            else if (baseFilterList.Count > 0 && !baseFilterList.Contains(card._base.ToString()))
             {
+                print(card.Name + " " + 8);
+
                 addToFilter = false;
             }
-            if (baseFilterList.Count > 0 && !baseFilterList.Contains(card._base.ToString()))
+            else if (lifeMaxFilter > 0 && (card.Life < lifeMinFilter || card.Life > lifeMaxFilter))
             {
+                print(card.Name + " " + 9);
+
                 addToFilter = false;
             }
-            if (card.Life >= lifeMinFilter && card.Life <= lifeMaxFilter)
+            else if (moveMaxFilter > 0 && (card.Move < moveMinFilter || card.Move > moveMaxFilter))
             {
+                print(card.Name + " " + 10);
+
                 addToFilter = false;
             }
-            if (card.Move >= moveMinFilter && card.Move <= moveMaxFilter)
+            else if (rangeMaxFilter > 0 && (card.Range < rangeMinFilter || card.Range > rangeMaxFilter))
             {
+                print(card.Name + " " + 11);
+
                 addToFilter = false;
             }
-            if (card.Range >= rangeMinFilter && card.Range <= rangeMaxFilter)
+            else if (attackMaxFilter > 0 && (card.Attack < attackMinFilter || card.Attack > attackMaxFilter))
             {
+                print(card.Name + " " + 12);
+
                 addToFilter = false;
             }
-            if (card.Attack >= attackMinFilter && card.Attack <= attackMaxFilter)
+            else if (defenseMaxFilter > 0 && (card.Defense < defenseMinFilter || card.Defense > defenseMaxFilter))
             {
+                print(card.Name + " " + 13);
                 addToFilter = false;
             }
-            if (card.Defense >= defenseMinFilter && card.Defense <= defenseMaxFilter)
+            else if (numberOfUnitsMaxFilter > 0 && (card.numberOfUnits < numberOfUnitsMinFilter || card.numberOfUnits > numberOfUnitsMaxFilter))
             {
+                print(card.Name + " " + 14);
+
                 addToFilter = false;
             }
-            if (card.numberOfUnits >= numberOfUnitsMinFilter && card.Life <= numberOfUnitsMaxFilter)
+            else if (heightMaxFilter > 0 && (card.Height < heightMinFilter || card.Height > heightMaxFilter))
             {
+                print(card.Name + " " + 15);
+
                 addToFilter = false;
             }
-            if (card.Height >= heightMinFilter && card.Life <= heightMaxFilter)
+            else if (pointsMaxFilter > 0 && (card.Points < pointsMinFilter || card.Points > pointsMaxFilter))
             {
-                addToFilter = false;
-            }
-            if (card.Points >= pointsMinFilter && card.Life <= pointsMaxFilter)
-            {
+                print(card.Name + " " + 16);
+
                 addToFilter = false;
             }
 
+            card.isFiltered = addToFilter;
             if (addToFilter)
             {
-                filteredUnits.Add(unit);
+                numFilteredCards++;
             }
         }
+        filteredCardsText.text = "Showing " + numFilteredCards + "/" + units.Count + " cards";
     }
 
     public void FinishBuildPlayerArmy()
